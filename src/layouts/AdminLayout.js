@@ -28,11 +28,11 @@ const AdminLayout = ({ children }) => {
 
         {/* Main Content */}
         <main
-          className={`flex-grow p-5 mt-[64px] transition-all ${
+          className={`flex-grow p-5 mt-[64px] transition-all bg-gray-100 ${
             isSidebarOpen
-              ? "md:ml-[200px]" // On desktop when sidebar is open
+              ? "md:ml-[250px]" // On desktop when sidebar is open
               : "ml-0" // On small/medium screens or when sidebar is closed
-          } md:ml-[200px]`} // Ensure 200px margin on desktop
+          } md:ml-[250px]`} // Ensure 200px margin on desktop
         >
           {children}
         </main>
