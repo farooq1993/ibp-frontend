@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";  //fix side bar 
 import { FaTachometerAlt } from "react-icons/fa";
 import Logo from "../assets/coat_of_arms.png";
 
