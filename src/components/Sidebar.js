@@ -36,25 +36,25 @@ const Sidebar = ({ isOpen }) => {
     {
       label: "Projects",
       icon: <VscProject />,
-      path: "/",
+      path: "/projects",
     },
     {
       label: "Project Prioritization",
       icon: <AiFillProject />,
       submenu: [
-        { label: "Rank Projects", path: "/" },
-        { label: "Priotize Projects", path: "/" },
+        { label: "Rank Projects", path: "/rank-projects" },
+        { label: "Prioritize Projects", path: "/prioritize-projects" },
       ],
     },
     {
       label: "Report Manager",
       icon: <TbReportSearch />,
-      submenu: [{ label: "Report Builder", path: "/" }],
+      submenu: [{ label: "Report Builder", path: "/report-builder" }],
     },
     {
       label: "Implementation Module",
       icon: <FaTachometerAlt />,
-      path: "/projects",
+      path: "/implementation-module",
     },
     {
       label: "Implementation Report",
