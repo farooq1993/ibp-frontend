@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Tabs, Tab, Box } from "@mui/material";
 import CostedAnnualizedPlan from "../CostedAnnualizedPlan";
 import ImplementationModule from "../ImplementationModule";
+import Contractual from "./Contractual";
 
 const ViewJob = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -31,7 +32,7 @@ const ViewJob = () => {
       </Box>
       <Box sx={{ padding: 2 }}>
         {activeTab === 0 && (
-          <CostedAnnualizedPlan />
+          <Contractual />
         )}
         {activeTab === 1 && "No data from PBS"}
         {activeTab === 2 && "No data from AMP"}
