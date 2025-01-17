@@ -48,8 +48,8 @@ const CostedAnnualizedPlan = () => {
 
   return (
     <div className="bg-white p-4 rounded-sm shadow-sm">
-      <h2 className="text-2xl font-semibold mb-4">
-        {code} - Retooling of Dairy Development Authority
+      <h2 className="text-xl font-semibold mb-4">
+        Retooling Uganda Coffee Development Project
       </h2>
       <div className="grid grid-cols-4 gap-4">
         {cards.map((card) => (
