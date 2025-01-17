@@ -22,22 +22,26 @@ const Contractual = () => {
           <TableHead>
             <TableRow>
               <TableCell>Contract Reference Number</TableCell>
-              <TableCell sx={{ padding: 0 }}>Contract Name</TableCell>
-              <TableCell sx={{ padding: 0 }}>Name of Contractor</TableCell>
-              <TableCell sx={{ padding: 0 }}>
+              <TableCell sx={{ padding: 1, width: "15%" }}>
+                Contract Name
+              </TableCell>
+              <TableCell sx={{ padding: 1, width: "25%" }}>
+                Name of Contractor
+              </TableCell>
+              <TableCell sx={{ padding: 1 }}>
                 Contract Start Date (FY)
               </TableCell>
-              <TableCell sx={{ padding: 0 }}>Contract End Date (FY)</TableCell>
-              <TableCell sx={{ padding: 0 }}>
+              <TableCell sx={{ padding: 1 }}>Contract End Date (FY)</TableCell>
+              <TableCell sx={{ padding: 1 }}>
                 Contract Value GOU (UGX)
               </TableCell>
-              <TableCell sx={{ padding: 0 }}>
+              <TableCell sx={{ padding: 1 }}>
                 Contract Value External (UGX)
               </TableCell>
-              <TableCell sx={{ padding: 0 }}>
+              <TableCell sx={{ padding: 1 }}>
                 Annual Penalty Interest Rate (%)
               </TableCell>
-              <TableCell sx={{ padding: 0 }}>Contract Status</TableCell>
+              <TableCell sx={{ padding: 1 }}>Contract Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
