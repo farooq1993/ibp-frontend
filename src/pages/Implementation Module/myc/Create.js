@@ -30,7 +30,7 @@ const ViewJob = () => {
           />
         </Tabs>
       </Box>
-      <Box sx={{ padding: 2 }}>
+      <Box sx={{ padding: 0 }}>
         {activeTab === 0 && (
           <Contractual />
         )}
