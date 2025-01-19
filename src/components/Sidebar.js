@@ -231,7 +231,7 @@ const Sidebar = ({ isOpen }) => {
       } md:translate-x-0 overflow-y-auto`}
     >
       {/* Sidebar Header */}
-      <div className="flex sticky top-0 items-center gap-3 px-4 min-h-[64px] shadow-sm bg-white">
+      <div className="flex sticky top-0 items-center gap-3 px-4 min-h-[64px] shadow-sm bg-white z-10">
         <div className="w-10 h-10">
           <img src={Logo} alt="Logo" className="w-full h-full object-contain" />
         </div>

@@ -1,42 +1,89 @@
 import React, { useState } from "react";
-import { Tabs, Tab, Box } from "@mui/material";
-import CostedAnnualizedPlan from "../CostedAnnualizedPlan";
-import ImplementationModule from "../ImplementationModule";
+import { Tabs, Tab, Box, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import Contractual from "./Contractual";
 
 const ViewJob = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const navigate = useNavigate(); // Hook to navigate between pages
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-};
+  };
 
+  const handleBackClick = () => {
+    // Navigate to the previous page
+    navigate(-1); // Equivalent to browser back
+  };
+
+  const handleSubmitClick = () => {
+    // Logic for Submit button
+    console.log("Submit button clicked");
+  };
+
+  const renderButtons = () => (
+    <Box
+      sx={{
+        display: "flex",
+        gap: 1,
+        justifyContent: "flex-end",
+        marginTop: 2,
+        padding: "0",
+      }}
+    >
+      <Button variant="outlined" color="secondary" onClick={handleBackClick}>
+        Back
+      </Button>
+      <Button variant="contained" color="primary" onClick={handleSubmitClick}>
+        Submit
+      </Button>
+    </Box>
+  );
 
   return (
     <div className="ViewJob">
-      <Box sx={{ borderBottom: 1, borderColor: "divider", backgroundColor: "white" }}>
+      {/* Tabs Header */}
+      <Box
+        sx={{
+          borderBottom: 1,
+          borderColor: "divider",
+          backgroundColor: "white",
+        }}
+      >
         <Tabs value={activeTab} onChange={handleTabChange}>
-          <Tab
-            label="CONTRACTUAL"
-          />
-          <Tab
-            label="NON CONTRACTUAL"
-          />
-          <Tab
-            label="COUNTERPART"
-          />
-          <Tab
-            label="ADDITIONAL MYC INFORMATION"
-          />
+          <Tab label="CONTRACTUAL" />
+          <Tab label="NON CONTRACTUAL" />
+          <Tab label="COUNTERPART" />
+          <Tab label="ADDITIONAL MYC INFORMATION" />
         </Tabs>
       </Box>
-      <Box sx={{ padding: 0 }}>
+
+      {/* Tab Content */}
+      <Box sx={{ padding: 2 }}>
         {activeTab === 0 && (
-          <Contractual />
+          <>
+            <Contractual />
+            {renderButtons()}
+          </>
         )}
-        {activeTab === 1 && "No data from PBS"}
-        {activeTab === 2 && "No data from AMP"}
-        {activeTab === 3 && "Hello"}
+        {activeTab === 1 && (
+          <>
+            <div>No data from PBS</div>
+            {renderButtons()}
+          </>
+        )}
+        {activeTab === 2 && (
+          <>
+            <div>No data from AMP</div>
+            {renderButtons()}
+          </>
+        )}
+        {activeTab === 3 && (
+          <>
+            <div>Hello</div>
+            {renderButtons()}
+          </>
+        )}
       </Box>
     </div>
   );

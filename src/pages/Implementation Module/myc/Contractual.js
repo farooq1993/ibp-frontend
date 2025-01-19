@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -9,8 +9,23 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import ViewCreate from "./ViewCreate";
+import { Box } from "@mui/material";
+import ContractualObligations from "./ContractualObligations";
+import Arrears from "./Arrears";
+import Procurement from "./Procurement";
 
 const Contractual = () => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [contractRefNumber, setContractRefNumber] = useState("");
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+
+  const handleContractRefChange = (event) => {
+    setContractRefNumber(event.target.value);
+  };
   return (
     <div>
       <TableContainer
@@ -32,13 +47,13 @@ const Contractual = () => {
                 Contract Start Date (FY)
               </TableCell>
               <TableCell sx={{ padding: 1 }}>Contract End Date (FY)</TableCell>
-              <TableCell sx={{ padding: 1 }}>
+              <TableCell sx={{ padding: 1, width: "15%" }}>
                 Contract Value GOU (UGX)
               </TableCell>
-              <TableCell sx={{ padding: 1 }}>
+              <TableCell sx={{ padding: 1, width: "15%" }}>
                 Contract Value External (UGX)
               </TableCell>
-              <TableCell sx={{ padding: 1 }}>
+              <TableCell sx={{ padding: 1, width: "10%" }}>
                 Annual Penalty Interest Rate (%)
               </TableCell>
               <TableCell sx={{ padding: 1 }}>Contract Status</TableCell>
@@ -48,7 +63,13 @@ const Contractual = () => {
             <TableRow>
               {/* Contract Reference Number */}
               <TableCell sx={{ padding: 1 }}>
-                <TextField fullWidth variant="outlined" size="small" />
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  value={contractRefNumber}
+                  onChange={handleContractRefChange}
+                />
               </TableCell>
               {/* Contract Name */}
               <TableCell align="right" sx={{ padding: 1 }}>
@@ -125,6 +146,21 @@ const Contractual = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Box
+        sx={{
+          borderBottom: 1,
+          borderColor: "divider",
+          backgroundColor: "white",
+        }}
+      >
+        <ViewCreate activeTab={activeTab} handleTabChange={handleTabChange} />
+
+        {activeTab === 0 && (
+          <ContractualObligations contractRefNumber={contractRefNumber} />
+        )}
+        {activeTab === 1 && <Arrears />}
+        {activeTab === 2 && <Procurement />}
+      </Box>
     </div>
   );
 };
