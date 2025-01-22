@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Tabs, Tab, Box, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Contractual from "./Contractual";
+import NonContractual from "./NonContractual";
 
 const ViewJob = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -68,7 +69,7 @@ const ViewJob = () => {
         )}
         {activeTab === 1 && (
           <>
-            <div>No data from PBS</div>
+            <NonContractual />
             {renderButtons()}
           </>
         )}
