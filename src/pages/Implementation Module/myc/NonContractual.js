@@ -8,14 +8,21 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import CircularProgress from "@mui/material/CircularProgress";
+import Pagination from "@mui/material/Pagination";
+import Box from "@mui/material/Box";
 
 const NonContractual = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const [page, setPage] = useState(1); // Start from page 1
+  const [rowsPerPage] = useState(10); // Fixed rows per page
+  const [totalPages, setTotalPages] = useState(0); // Total number of pages
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(
           "https://pbsopenapi.finance.go.ug/graphql",
@@ -43,7 +50,9 @@ const NonContractual = () => {
           }
         );
 
-        setData(response.data.data.cgIbpProjectBudgetAllocations || []);
+        const fetchedData = response.data.data.cgIbpProjectBudgetAllocations;
+        setData(fetchedData || []);
+        setTotalPages(Math.ceil(fetchedData.length / rowsPerPage));
       } catch (err) {
         setError(err.message || "Something went wrong");
       } finally {
@@ -52,7 +61,17 @@ const NonContractual = () => {
     };
 
     fetchData();
-  }, []);
+  }, [rowsPerPage]);
+
+  const handlePageChange = (event, value) => {
+    setPage(value); // Set the new page number
+  };
+
+  // Paginated data for the current page
+  const paginatedData = data.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
 
   return (
     <div>
@@ -70,9 +89,7 @@ const NonContractual = () => {
               <TableCell align="left">Description</TableCell>
               <TableCell align="left">GOU</TableCell>
               <TableCell align="left">ExtFin</TableCell>
-              <TableCell align="left" sx={{ width: "15%" }}>
-                Fiscal Year
-              </TableCell>
+              <TableCell align="left">Fiscal Year</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -88,8 +105,8 @@ const NonContractual = () => {
                   Error: {error}
                 </TableCell>
               </TableRow>
-            ) : data.length > 0 ? (
-              data.map((row, index) => (
+            ) : paginatedData.length > 0 ? (
+              paginatedData.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell align="left">{row.Vote_Code}</TableCell>
                   <TableCell align="left">{row.Project_Code}</TableCell>
@@ -109,6 +126,15 @@ const NonContractual = () => {
             )}
           </TableBody>
         </Table>
+        <Box sx={{ display: "flex", justifyContent: "end", padding: 2 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            variant="outlined"
+            shape="rounded"
+          />
+        </Box>
       </TableContainer>
     </div>
   );
