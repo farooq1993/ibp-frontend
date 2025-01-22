@@ -10,6 +10,8 @@ import Paper from "@mui/material/Paper";
 import CircularProgress from "@mui/material/CircularProgress";
 import Pagination from "@mui/material/Pagination";
 import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 
 const NonContractual = () => {
   const [data, setData] = useState([]);
@@ -19,6 +21,9 @@ const NonContractual = () => {
   const [page, setPage] = useState(1); // Start from page 1
   const [rowsPerPage] = useState(10); // Fixed rows per page
   const [totalPages, setTotalPages] = useState(0); // Total number of pages
+
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [filteredData, setFilteredData] = useState([]); // Store filtered data
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,14 +72,97 @@ const NonContractual = () => {
     setPage(value); // Set the new page number
   };
 
+  // Handle the search input change
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  // Perform the search when the button is clicked or Enter is pressed
+  const handleSearch = () => {
+    const filtered = data.filter((row) => {
+      return (
+        row.Vote_Code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        row.Project_Code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        row.Item_Code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        row.Description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        row.Fiscal_Year.toString().includes(searchQuery) // Handle year as string
+      );
+    });
+
+    setFilteredData(filtered);
+    setTotalPages(Math.ceil(filtered.length / rowsPerPage)); // Update total pages
+    setPage(1); // Reset to page 1 when search is performed
+  };
+
+  // Clear the search and reset to original data
+  const handleClear = () => {
+    setSearchQuery(""); // Clear the search input
+    setFilteredData(data); // Reset filtered data to original
+    setTotalPages(Math.ceil(data.length / rowsPerPage)); // Reset total pages
+    setPage(1); // Reset to page 1
+  };
+
   // Paginated data for the current page
-  const paginatedData = data.slice(
+  const paginatedData = filteredData.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
   );
 
+  // Define the styles for the TableCell headers
+  const tableHeaderStyle = {
+    fontWeight: "bold",
+  };
+
   return (
     <div>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        <Box sx={{ display: "flex", gap: 3 }}>
+          {/* TextField with 30% width */}
+          <TextField
+            label="Search"
+            variant="outlined"
+            size="small"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            sx={{ marginBottom: 2, flexBasis: "50%" }} // Set flexBasis to 30% for TextField
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearch(); // Trigger search on Enter key press
+            }}
+          />
+
+          <Box sx={{ display: "flex", gap: 1}}>
+            <Button
+              variant="contained"
+              onClick={handleSearch}
+              sx={{ marginBottom: 2 }}
+            >
+              Search
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleClear}
+              sx={{ marginBottom: 2 }}
+              color="error"
+            >
+              Clear
+            </Button>
+          </Box>
+        </Box>
+
+        {/* Results Section */}
+        <Box>
+          {filteredData.length}{" "}
+          {filteredData.length === 1 ? "result" : "results"} found
+        </Box>
+      </Box>
+
       <TableContainer
         className="shadow-sm"
         component={Paper}
@@ -83,13 +171,27 @@ const NonContractual = () => {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell align="left">Vote Code</TableCell>
-              <TableCell align="left">Project Code</TableCell>
-              <TableCell align="left">Item Code</TableCell>
-              <TableCell align="left">Description</TableCell>
-              <TableCell align="left">GOU</TableCell>
-              <TableCell align="left">ExtFin</TableCell>
-              <TableCell align="left">Fiscal Year</TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
+                Vote Code
+              </TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
+                Project Code
+              </TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
+                Item Code
+              </TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
+                Description
+              </TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
+                GOU
+              </TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
+                ExtFin
+              </TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
+                Fiscal Year
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -112,8 +214,12 @@ const NonContractual = () => {
                   <TableCell align="left">{row.Project_Code}</TableCell>
                   <TableCell align="left">{row.Item_Code}</TableCell>
                   <TableCell align="left">{row.Description}</TableCell>
-                  <TableCell align="left">{row.GoU}</TableCell>
-                  <TableCell align="left">{row.ExtFin}</TableCell>
+                  <TableCell align="left">
+                    {new Intl.NumberFormat().format(row.GoU)}
+                  </TableCell>
+                  <TableCell align="left">
+                    {new Intl.NumberFormat().format(row.ExtFin)}
+                  </TableCell>
                   <TableCell align="left">{row.Fiscal_Year}</TableCell>
                 </TableRow>
               ))
