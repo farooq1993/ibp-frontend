@@ -34,7 +34,7 @@ const NonContractual = () => {
           {
             headers: {
               Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik5pdGEiLCJzdWIiOjIsImlhdCI6MTczNzUxOTM4NCwiZXhwIjoxNzM3NjA1Nzg0fQ.xKLIFi6ZOdnIqoBbCuWi6-J5yhM5URnDP0xTUnX7WvM",
+                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik5pdGEiLCJzdWIiOjIsImlhdCI6MTczNzY0OTkyNCwiZXhwIjoxNzM3NzM2MzI0fQ.G6HmBG6JAyn1vxAsctxbshZ_h6fXLtVeFs-o4ISOsO0",
               "Content-Type": "application/json",
             },
             params: {
@@ -42,11 +42,16 @@ const NonContractual = () => {
                 query {
                   cgIbpProjectBudgetAllocations {
                     Vote_Code
+                    Vote_Name
                     Project_Code
-                    Item_Code
+                    Project_Name
+                    Programme_Code
+                    Programme_Name
                     Description
                     GoU
                     ExtFin
+                    GoUArrears
+                    BudgetStage
                     Fiscal_Year
                   }
                 }
@@ -57,6 +62,7 @@ const NonContractual = () => {
 
         const fetchedData = response.data.data.cgIbpProjectBudgetAllocations;
         setData(fetchedData || []);
+        setFilteredData(fetchedData || []);
         setTotalPages(Math.ceil(fetchedData.length / rowsPerPage));
       } catch (err) {
         setError(err.message || "Something went wrong");
@@ -80,13 +86,14 @@ const NonContractual = () => {
   // Perform the search when the button is clicked or Enter is pressed
   const handleSearch = () => {
     const filtered = data.filter((row) => {
-      return (
-        row.Vote_Code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        row.Project_Code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        row.Item_Code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        row.Description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        row.Fiscal_Year.toString().includes(searchQuery) // Handle year as string
-      );
+      // Loop through each field in the row and check if any value matches the search query
+      return Object.values(row).some((value) => {
+        // Convert value to string and check if it includes the search query
+        return value
+          .toString()
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+      });
     });
 
     setFilteredData(filtered);
@@ -123,21 +130,25 @@ const NonContractual = () => {
           gap: 2,
         }}
       >
+        {/* Results Section */}
+        <Box>
+          <b>{filteredData.length}</b>{" "}
+          {filteredData.length === 1 ? "result" : "results"} found
+        </Box>
         <Box sx={{ display: "flex", gap: 3 }}>
-          {/* TextField with 30% width */}
           <TextField
             label="Search"
             variant="outlined"
             size="small"
             value={searchQuery}
             onChange={handleSearchChange}
-            sx={{ marginBottom: 2, flexBasis: "50%" }} // Set flexBasis to 30% for TextField
+            sx={{ marginBottom: 2, flexBasis: "100%" }}
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSearch(); // Trigger search on Enter key press
             }}
           />
 
-          <Box sx={{ display: "flex", gap: 1}}>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <Button
               variant="contained"
               onClick={handleSearch}
@@ -155,18 +166,12 @@ const NonContractual = () => {
             </Button>
           </Box>
         </Box>
-
-        {/* Results Section */}
-        <Box>
-          {filteredData.length}{" "}
-          {filteredData.length === 1 ? "result" : "results"} found
-        </Box>
       </Box>
 
       <TableContainer
         className="shadow-sm"
         component={Paper}
-        sx={{ boxShadow: "none" }}
+        sx={{ boxShadow: "none", maxWidth: "100%", overflowX: "auto" }}
       >
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
@@ -175,16 +180,28 @@ const NonContractual = () => {
                 Vote Code
               </TableCell>
               <TableCell sx={tableHeaderStyle} align="left">
+                Vote Name
+              </TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
                 Project Code
               </TableCell>
               <TableCell sx={tableHeaderStyle} align="left">
-                Item Code
+                Project Name
+              </TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
+                Programme Code
+              </TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
+                Programme Name
               </TableCell>
               <TableCell sx={tableHeaderStyle} align="left">
                 Description
               </TableCell>
               <TableCell sx={tableHeaderStyle} align="left">
                 GOU
+              </TableCell>
+              <TableCell sx={tableHeaderStyle} align="left">
+                GOU Arrears
               </TableCell>
               <TableCell sx={tableHeaderStyle} align="left">
                 ExtFin
@@ -197,13 +214,13 @@ const NonContractual = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={15} align="center">
                   <CircularProgress />
                 </TableCell>
               </TableRow>
             ) : error ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={15} align="center">
                   Error: {error}
                 </TableCell>
               </TableRow>
@@ -211,11 +228,17 @@ const NonContractual = () => {
               paginatedData.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell align="left">{row.Vote_Code}</TableCell>
+                  <TableCell align="left">{row.Vote_Name}</TableCell>
                   <TableCell align="left">{row.Project_Code}</TableCell>
-                  <TableCell align="left">{row.Item_Code}</TableCell>
+                  <TableCell align="left">{row.Project_Name}</TableCell>
+                  <TableCell align="left">{row.Programme_Code}</TableCell>
+                  <TableCell align="left">{row.Programme_Name}</TableCell>
                   <TableCell align="left">{row.Description}</TableCell>
                   <TableCell align="left">
                     {new Intl.NumberFormat().format(row.GoU)}
+                  </TableCell>
+                  <TableCell align="left">
+                    {new Intl.NumberFormat().format(row.GoUArrears)}
                   </TableCell>
                   <TableCell align="left">
                     {new Intl.NumberFormat().format(row.ExtFin)}
@@ -225,7 +248,7 @@ const NonContractual = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={15} align="center">
                   No data available
                 </TableCell>
               </TableRow>
