@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
 import {
   FaTachometerAlt,
   FaUsers,
@@ -18,6 +17,7 @@ import { RiFundsLine } from "react-icons/ri";
 import { IoPricetagsOutline, IoTrashBinOutline } from "react-icons/io5";
 import { GrResources, GrIntegration, GrRevert } from "react-icons/gr";
 import { IoIosArrowDown, IoMdLocate } from "react-icons/io"; // Import arrow icon
+import { NavLink } from "react-router-dom";  //fix side bar 
 import Logo from "../assets/coat_of_arms.png";
 
 const Sidebar = ({ isOpen }) => {
