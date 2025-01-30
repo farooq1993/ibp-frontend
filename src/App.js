@@ -3,7 +3,7 @@ import "./App.css";
 import "./index.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import AdminLayout from "./layouts/AdminLayout";
-import Login from "./auth/Login";
+//import Login from "./auth/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/User";
 import Settings from "./pages/Setting";
@@ -17,15 +17,15 @@ import Create from "./pages/Implementation Module/myc/Create";
 
 function App() {
   // Non-Admin Routes (routes that do not require AdminLayout)
-  const nonAdminRoutes = [{ path: "/login", element: <Login /> }];
+  //const nonAdminRoutes = [{ path: "/login", element: <Login /> }];
   return (
     <div className="App">
       <Router>
         <Routes>
           {/* Render Non-Admin Routes */}
-          {nonAdminRoutes.map((route) => (
+          {/* {nonAdminRoutes.map((route) => (
             <Route key={route.path} path={route.path} element={route.element} />
-          ))}
+          ))} */}
           <Route element={<AdminLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
