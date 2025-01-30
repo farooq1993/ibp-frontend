@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Outlet } from 'react-router-dom';
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 
@@ -34,7 +35,7 @@ const AdminLayout = ({ children }) => {
               : "ml-0" // On small/medium screens or when sidebar is closed
           } md:ml-[250px]`} // Ensure 200px margin on desktop
         >
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>
