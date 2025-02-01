@@ -79,7 +79,7 @@ const Sidebar = ({ isOpen }) => {
         },
         {
           label: "MYC Reports",
-          path: "/",
+          path: "/myc-reports",
         },
         {
           label: "Project Prioritization Reports",

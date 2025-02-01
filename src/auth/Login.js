@@ -13,13 +13,25 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({}); // State to store validation errors
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true); 
 
-  // Redirect logged-in users away from login page
+  // Check authentication before rendering login page
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/"); // Redirect if already logged in
+    } else {
+      setIsCheckingAuth(false); // Stop loading and show login page
     }
   }, [isAuthenticated, navigate]);
+
+    // ✅ Prevent rendering login page until authentication is checked
+    if (isCheckingAuth) {
+      return (
+        <div className="w-full min-h-screen flex justify-center items-center">
+          <CircularProgress size={50} sx={{ color: "#b33505" }} />
+        </div>
+      );
+    }
 
   // Validation Function
   const validateForm = () => {
