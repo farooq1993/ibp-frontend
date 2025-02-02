@@ -14,6 +14,7 @@ import ReportBuilder from "./pages/Report Manager/ReportBuilder";
 import ImplementationModule from "./pages/Implementation Module/ImplementationModule";
 import CostedAnnualizedPlan from "./pages/Implementation Module/CostedAnnualizedPlan";
 import Create from "./pages/Implementation Module/myc/Create";
+import MYCPost from "./pages/Implementation Reports/MYCPost";
 import MYCReports from "./pages/Implementation Reports/MYCReports";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
@@ -57,6 +58,7 @@ function App() {
                   element={<Create />}
                 />
                 <Route path="/myc-reports" element={<MYCReports />} />
+                <Route path="/myc-post" element={<MYCPost />} />
               </Route>
             </Route>
           </Routes>

@@ -20,7 +20,7 @@ import { IoIosArrowDown, IoMdLocate } from "react-icons/io"; // Import arrow ico
 import { NavLink } from "react-router-dom";  //fix side bar 
 import Logo from "../assets/coat_of_arms.png";
 
-const Sidebar = ({ isOpen }) => {
+const Sidebar = ({ isOpen, onSidebarItemClick }) => {
   const [openMenu, setOpenMenu] = useState(null);
 
   const toggleMenu = (menu) => {
@@ -267,6 +267,7 @@ const Sidebar = ({ isOpen }) => {
                       <li key={subIndex}>
                         <NavLink
                           to={subItem.path}
+                          onClick={() => onSidebarItemClick && onSidebarItemClick()}
                           className={({ isActive }) =>
                             `flex items-center gap-2 px-2 py-2 transition-colors text-sm ${
                               isActive
@@ -286,6 +287,7 @@ const Sidebar = ({ isOpen }) => {
             ) : (
               <NavLink
                 to={item.path}
+                onClick={() => onSidebarItemClick && onSidebarItemClick()}
                 className={({ isActive }) =>
                   `flex items-center gap-2 px-5 py-3 transition-colors text-sm ${
                     isActive
