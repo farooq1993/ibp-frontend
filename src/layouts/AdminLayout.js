@@ -10,6 +10,11 @@ const AdminLayout = ({ children }) => {
     setSidebarOpen(!isSidebarOpen);
   };
 
+  // This function will close the sidebar (set state to false)
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
@@ -25,11 +30,11 @@ const AdminLayout = ({ children }) => {
 
       <div className="flex flex-grow">
         {/* Sidebar */}
-        <Sidebar isOpen={isSidebarOpen} />
+        <Sidebar isOpen={isSidebarOpen} onSidebarItemClick={closeSidebar} />
 
         {/* Main Content */}
         <main
-          className={`flex-grow p-5 mt-[64px] transition-all bg-gray-100 ${
+          className={`flex-grow p-5 mt-[64px] transition-all bg-gray-100 overflow-hidden ${
             isSidebarOpen
               ? "md:ml-[250px]" // On desktop when sidebar is open
               : "ml-0" // On small/medium screens or when sidebar is closed
