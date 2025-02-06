@@ -56,21 +56,31 @@ const ImplementationModule = () => {
     navigate(`/implementation-module/${code}/costed-annualized-plan`);
   };
 
+  const tableHeaderStyle = {
+    fontWeight: "bold",
+    backgroundColor: "#ffd997",
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-4">Implementation Module</h2>
-      <TableContainer component={Paper} elevation={0} variant="outlined">
-        <Table>
+      <TableContainer
+        component={Paper}
+        elevation={0}
+        variant="outlined"
+        sx={{ maxHeight: 500, overflow: "auto", position: "relative" }}
+      >
+        <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              <TableCell>Code</TableCell>
-              <TableCell>Id</TableCell>
-              <TableCell>Project Title</TableCell>
-              <TableCell>Submission Date</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Programs</TableCell>
-              <TableCell>Title</TableCell>
-              <TableCell>Action</TableCell>
+              <TableCell sx={tableHeaderStyle}>Code</TableCell>
+              <TableCell sx={tableHeaderStyle}>Id</TableCell>
+              <TableCell sx={tableHeaderStyle}>Project Title</TableCell>
+              <TableCell sx={tableHeaderStyle}>Submission Date</TableCell>
+              <TableCell sx={tableHeaderStyle}>Status</TableCell>
+              <TableCell sx={tableHeaderStyle}>Programs</TableCell>
+              <TableCell sx={tableHeaderStyle}>Title</TableCell>
+              <TableCell sx={tableHeaderStyle}>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

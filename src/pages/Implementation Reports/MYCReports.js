@@ -8,31 +8,14 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button,
   Box,
   CircularProgress,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const MYCReports = () => {
-  const navigate = useNavigate();
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const buttonStyles = {
-    padding: "5px 15px",
-    backgroundColor: "rgb(255, 217, 151)",
-    color: "black",
-    "&:hover": {
-      backgroundColor: "rgb(255, 217, 151)",
-    },
-    "&:active": {
-      backgroundColor: "rgba(255, 217, 151, 0.7)",
-    },
-    transition: "background-color 0.2s ease",
-  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -57,6 +40,7 @@ const MYCReports = () => {
   // Define the styles for the TableCell headers
   const tableHeaderStyle = {
     fontWeight: "bold",
+    backgroundColor: "#ffd997",
   };
 
   return (
@@ -67,7 +51,7 @@ const MYCReports = () => {
           component={Paper}
           elevation={0}
           variant="outlined"
-          sx={{ boxShadow: "none", minWidth: "100%" }}
+          sx={{ maxHeight: 540, overflow: "auto", position: "relative" }}
         >
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
@@ -133,7 +117,7 @@ const MYCReports = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={15} align="center">
+                  <TableCell colSpan={13} align="center">
                     <CircularProgress sx={{ color: "#772303" }} />
                   </TableCell>
                 </TableRow>
