@@ -11,113 +11,145 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Pagination from "@mui/material/Pagination";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 
 const NonContractual = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Set loading to true initially
   const [error, setError] = useState(null);
 
-  const [page, setPage] = useState(1); // Start from page 1
-  const [rowsPerPage] = useState(10); // Fixed rows per page
-  const [totalPages, setTotalPages] = useState(0); // Total number of pages
+  const [page, setPage] = useState(1);
+  const [rowsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
-  const [filteredData, setFilteredData] = useState([]); // Store filtered data
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [accessToken, setAccessToken] = useState("");
+
+  // Function to login and fetch access_token
+  const login = async () => {
+    try {
+      const response = await axios.post(
+        "https://pbsopenapi.finance.go.ug/graphql",
+        {
+          query: `
+            mutation {
+              login(
+                data: {
+                  User_Name: "Nita",
+                  Password: "Nita1290W",
+                  ipAddress: "192.168.5.0"
+                }
+              ) {
+                access_token
+                refresh_token
+              }
+            }
+          `,
+        }
+      );
+      setAccessToken(response.data.data.login.access_token);
+    } catch (err) {
+      setError(err.message || "Login failed");
+    }
+  };
+
+  const fetchData = async () => {
+    if (!accessToken) return;
+    try {
+      const response = await axios.post(
+        "https://pbsopenapi.finance.go.ug/graphql",
+        {
+          query: `
+            query {
+              cgIbpProjectBudgetAllocations {
+                Vote_Code
+                Vote_Name
+                Project_Code
+                Project_Name
+                Programme_Code
+                Programme_Name
+                Description
+                GoU
+                ExtFin
+                GoUArrears
+                BudgetStage
+                Fiscal_Year
+              }
+            }
+          `,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const fetchedData = response.data.data.cgIbpProjectBudgetAllocations;
+
+      // Remove duplicates
+      const uniqueData = removeDuplicates(fetchedData);
+      setData(uniqueData || []);
+      setFilteredData(uniqueData || []);
+      setTotalPages(Math.ceil(uniqueData.length / rowsPerPage));
+    } catch (err) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false); // Turn off loading once data is fetched
+    }
+  };
+
+  // Remove duplicates based on Project_Code
+  const removeDuplicates = (arr) => {
+    const seen = new Set();
+    return arr.filter((item) => {
+      const identifier = item.Project_Code;
+      if (seen.has(identifier)) {
+        return false;
+      }
+      seen.add(identifier);
+      return true;
+    });
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          "https://pbsopenapi.finance.go.ug/graphql",
-          {
-            headers: {
-              Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik5pdGEiLCJzdWIiOjIsImlhdCI6MTczNzY0OTkyNCwiZXhwIjoxNzM3NzM2MzI0fQ.G6HmBG6JAyn1vxAsctxbshZ_h6fXLtVeFs-o4ISOsO0",
-              "Content-Type": "application/json",
-            },
-            params: {
-              query: `
-                query {
-                  cgIbpProjectBudgetAllocations {
-                    Vote_Code
-                    Vote_Name
-                    Project_Code
-                    Project_Name
-                    Programme_Code
-                    Programme_Name
-                    Description
-                    GoU
-                    ExtFin
-                    GoUArrears
-                    BudgetStage
-                    Fiscal_Year
-                  }
-                }
-              `,
-            },
-          }
-        );
-
-        const fetchedData = response.data.data.cgIbpProjectBudgetAllocations;
-        setData(fetchedData || []);
-        setFilteredData(fetchedData || []);
-        setTotalPages(Math.ceil(fetchedData.length / rowsPerPage));
-      } catch (err) {
-        setError(err.message || "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [rowsPerPage]);
+    if (!accessToken) {
+      login(); // Call login to fetch access token
+    } else {
+      fetchData(); // Fetch data once access_token is available
+    }
+  }, [accessToken]);
 
   const handlePageChange = (event, value) => {
-    setPage(value); // Set the new page number
+    setPage(value);
   };
 
-  // Handle the search input change
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
-  };
 
-  // Perform the search when the button is clicked or Enter is pressed
-  const handleSearch = () => {
-    const filtered = data.filter((row) => {
-      // Loop through each field in the row and check if any value matches the search query
-      return Object.values(row).some((value) => {
-        // Convert value to string and check if it includes the search query
-        return value
+    const filtered = data.filter((row) =>
+      Object.values(row).some((value) =>
+        value
           .toString()
           .toLowerCase()
-          .includes(searchQuery.toLowerCase());
-      });
-    });
+          .includes(event.target.value.toLowerCase())
+      )
+    );
 
     setFilteredData(filtered);
-    setTotalPages(Math.ceil(filtered.length / rowsPerPage)); // Update total pages
-    setPage(1); // Reset to page 1 when search is performed
+    setTotalPages(Math.ceil(filtered.length / rowsPerPage));
+    setPage(1); // Reset to page 1 on search
   };
 
-  // Clear the search and reset to original data
-  const handleClear = () => {
-    setSearchQuery(""); // Clear the search input
-    setFilteredData(data); // Reset filtered data to original
-    setTotalPages(Math.ceil(data.length / rowsPerPage)); // Reset total pages
-    setPage(1); // Reset to page 1
-  };
-
-  // Paginated data for the current page
   const paginatedData = filteredData.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
   );
 
-  // Define the styles for the TableCell headers
   const tableHeaderStyle = {
     fontWeight: "bold",
+    backgroundColor: "#ffd997",
   };
 
   return (
@@ -130,7 +162,6 @@ const NonContractual = () => {
           gap: 2,
         }}
       >
-        {/* Results Section */}
         <Box>
           <b>{filteredData.length}</b>{" "}
           {filteredData.length === 1 ? "result" : "results"} found
@@ -143,37 +174,17 @@ const NonContractual = () => {
             value={searchQuery}
             onChange={handleSearchChange}
             sx={{ marginBottom: 2, flexBasis: "100%" }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleSearch(); // Trigger search on Enter key press
-            }}
           />
-
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button
-              variant="contained"
-              onClick={handleSearch}
-              sx={{ marginBottom: 2 }}
-            >
-              Search
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleClear}
-              sx={{ marginBottom: 2 }}
-              color="error"
-            >
-              Clear
-            </Button>
-          </Box>
         </Box>
       </Box>
 
       <TableContainer
-        className="shadow-sm"
         component={Paper}
-        sx={{ boxShadow: "none", maxWidth: "100%", overflowX: "auto" }}
+        elevation={0}
+        variant="outlined"
+        sx={{ maxHeight: 500, overflow: "auto", position: "relative" }}
       >
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
               <TableCell sx={tableHeaderStyle} align="left">
@@ -214,8 +225,8 @@ const NonContractual = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={15} align="center">
-                  <CircularProgress />
+                <TableCell colSpan={11} align="center">
+                  <CircularProgress sx={{ color: "#772303" }} />
                 </TableCell>
               </TableRow>
             ) : error ? (
@@ -255,16 +266,16 @@ const NonContractual = () => {
             )}
           </TableBody>
         </Table>
-        <Box sx={{ display: "flex", justifyContent: "end", padding: 2 }}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handlePageChange}
-            variant="outlined"
-            shape="rounded"
-          />
-        </Box>
       </TableContainer>
+      <Box sx={{ display: "flex", justifyContent: "end", padding: 2 }}>
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={handlePageChange}
+          variant="outlined"
+          shape="rounded"
+        />
+      </Box>
     </div>
   );
 };

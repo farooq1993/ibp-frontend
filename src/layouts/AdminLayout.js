@@ -34,7 +34,7 @@ const AdminLayout = ({ children }) => {
 
         {/* Main Content */}
         <main
-          className={`flex-grow p-5 mt-[64px] transition-all bg-gray-100 overflow-hidden ${
+          className={`flex-grow p-5 mt-[64px] transition-all bg-white overflow-hidden ${
             isSidebarOpen
               ? "md:ml-[250px]" // On desktop when sidebar is open
               : "ml-0" // On small/medium screens or when sidebar is closed
