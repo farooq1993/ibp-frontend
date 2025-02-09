@@ -63,7 +63,7 @@ const ImplementationModule = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Implementation Module</h2>
+      <h2 className="text-xl p-2  mb-4">Implementation Module</h2>
       <TableContainer
         component={Paper}
         elevation={0}

@@ -5,7 +5,7 @@ import { Button } from '@mui/material';
 const ButtonMui = ({ children, onClick }) => {
   return (
     <Button
-    size='small'
+    // size='small'
       onClick={onClick}
       sx={{
         backgroundColor: 'rgb(255, 217, 151)', // Background color
