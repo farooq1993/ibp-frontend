@@ -1,124 +1,128 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Paper,
-  TextField,
-  Button,
-  Stack,
-  Box,
-  Typography,
-} from "@mui/material";
+import { useParams, useNavigate } from "react-router-dom";
+import { TextField, Button, CircularProgress, Box, Stack } from "@mui/material";
 import ButtonMui from "../../components/mui-component/ButtonMui";
 
-const MYCPost = () => {
-  // Initialize state for all form fields.
-  const [formData, setFormData] = useState({
-    financing_agreement_title: "",
-    annual_appropriations: "",
-    approved_payments: "",
-    arrears: "",
-    verified_arrears: "",
-    unverified_arrears: "",
-    arrears_payment: "",
-    arrears_6_months_plus: "",
-    contract_reference_number: "",
-    contract_expenditures: "",
-    contract_implementation_plan: "",
-    contract_name: "",
-    contractor_name: "",
-    contract_start_date: "",
-    contract_end_date: "",
-    contract_payment_plan: "",
-    contract_status: "",
-    contract_terms: "",
-    contract_value: "",
-    counterpart_requirement_specification: "",
-    counterpart_value: "",
-    currency: "",
-    counterpart_financing_plan: "",
-    funding_source: "",
-    fy_1_myc: "",
-    mtef_ceilings: "",
-    non_contractual_commitments: "",
-    programme_code: "",
-    programme_name: "",
-    project_classification: "",
-    project_code: "",
-    project_end_date: "",
-    project_name: "",
-    project_start_date: "",
-    vote_code: "",
-    vote_name: "",
-  });
-  // State to hold errors for each field.
+const MYCEdit = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({});
+  const [initialData, setInitialData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // Update state on input change and clear errors for the field.
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Remove error when the user starts typing
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const response = await axios.get(
+          `https://farooqa.pythonanywhere.com/add_myc/multi_year_commitment?id=${id}`
+        );
+
+        const data = Array.isArray(response.data)
+          ? response.data[0]
+          : response.data;
+        if (!data) {
+          setFormData({});
+          setInitialData({});
+          setLoading(false);
+          return;
+        }
+
+        const formatDate = (dateString) => {
+          if (!dateString) return "";
+          return new Date(dateString).toISOString().split("T")[0];
+        };
+
+        const formattedData = {
+          ...data,
+          project_id: data.project_id || id, // Set `project_id` to `id` if missing
+          contract_start_date: formatDate(data.contract_start_date),
+          contract_end_date: formatDate(data.contract_end_date),
+          project_start_date: formatDate(data.project_start_date),
+          project_end_date: formatDate(data.project_end_date),
+        };
+
+        setFormData(formattedData);
+        setInitialData(formattedData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching project:", error);
+        setError("Failed to load project data.");
+        setLoading(false);
+      }
+    };
+
+    fetchProject();
+  }, [id]);
+
+  const handleInputChange = (e) => {
+    const { name, value, type } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "number" && value.trim() !== "" ? parseFloat(value) : value,
+    }));
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
-  // Validate that all fields are filled. Returns an object with errors.
-  const validate = () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    console.log("Submitting Form:", formData);
+
+    // Ensure `project_id` exists in formData
+    if (!formData.project_id) {
+      formData.project_id = id;
+    }
+
     const newErrors = {};
     Object.keys(formData).forEach((field) => {
       if (!formData[field]) {
         newErrors[field] = "This field is required";
       }
     });
-    return newErrors;
-  };
 
-  // Submit form data via POST request.
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
-      // If there are errors, do not submit and set error state.
+      console.log("Validation Errors:", newErrors);
       setErrors(newErrors);
       return;
     }
 
-    // Clear errors if validation passes.
-    setErrors({});
+    const updatedFields = { ...formData }; // Always send all fields
 
-    // Convert number fields appropriately.
-    const payload = {
-      ...formData,
-      annual_appropriations: Number(formData.annual_appropriations),
-      approved_payments: Number(formData.approved_payments),
-      arrears: Number(formData.arrears),
-      verified_arrears: Number(formData.verified_arrears),
-      unverified_arrears: Number(formData.unverified_arrears),
-      arrears_payment: Number(formData.arrears_payment),
-      arrears_6_months_plus: Number(formData.arrears_6_months_plus),
-      contract_expenditures: Number(formData.contract_expenditures),
-      contract_value: Number(formData.contract_value),
-      counterpart_value: Number(formData.counterpart_value),
-      fy_1_myc: Number(formData.fy_1_myc),
-      mtef_ceilings: Number(formData.mtef_ceilings),
-    };
+    console.log("Updated Fields to send:", updatedFields);
 
     try {
-      const response = await axios.post(
-        "https://farooqa.pythonanywhere.com/add_myc/multi_year_commitment",
-        payload
+      const response = await axios.patch(
+        `https://farooqa.pythonanywhere.com/add_myc/multi_year_commitment/${id}`,
+        updatedFields,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
-      console.log("Response:", response.data);
-      // Optionally, clear the form or display a success message.
+
+      console.log("API Response:", response.data);
+      alert("Form updated successfully!");
+      navigate("/");
     } catch (error) {
-      console.error("Error posting data:", error);
+      console.error("Error updating project:", error);
+      setError("Failed to update project.");
     }
   };
 
   return (
     <Box>
-      <h2 className="text-xl p-2  mb-4">MYC Reports</h2>
+      <h2 className="text-xl p-2  mb-4">Edit MYC Report</h2>
+
+      {error && <div style={{ color: "red" }}>{error}</div>}
+
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>
           {/* Financing Agreement Title */}
@@ -126,8 +130,8 @@ const MYCPost = () => {
             <TextField
               label="Financing Agreement Title"
               name="financing_agreement_title"
-              value={formData.financing_agreement_title}
-              onChange={handleChange}
+              value={formData.financing_agreement_title || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.financing_agreement_title)}
               helperText={errors.financing_agreement_title}
               size="small"
@@ -138,8 +142,8 @@ const MYCPost = () => {
               label="Annual Appropriations"
               name="annual_appropriations"
               type="number"
-              value={formData.annual_appropriations}
-              onChange={handleChange}
+              value={formData.annual_appropriations || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.annual_appropriations)}
               helperText={errors.annual_appropriations}
               size="small"
@@ -149,8 +153,8 @@ const MYCPost = () => {
               label="Approved Payments"
               name="approved_payments"
               type="number"
-              value={formData.approved_payments}
-              onChange={handleChange}
+              value={formData.approved_payments || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.approved_payments)}
               helperText={errors.approved_payments}
               size="small"
@@ -164,8 +168,8 @@ const MYCPost = () => {
               label="Arrears"
               name="arrears"
               type="number"
-              value={formData.arrears}
-              onChange={handleChange}
+              value={formData.arrears || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.arrears)}
               helperText={errors.arrears}
               size="small"
@@ -175,8 +179,8 @@ const MYCPost = () => {
               label="Verified Arrears"
               name="verified_arrears"
               type="number"
-              value={formData.verified_arrears}
-              onChange={handleChange}
+              value={formData.verified_arrears || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.verified_arrears)}
               helperText={errors.verified_arrears}
               size="small"
@@ -186,8 +190,8 @@ const MYCPost = () => {
               label="Unverified Arrears"
               name="unverified_arrears"
               type="number"
-              value={formData.unverified_arrears}
-              onChange={handleChange}
+              value={formData.unverified_arrears || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.unverified_arrears)}
               helperText={errors.unverified_arrears}
               size="small"
@@ -199,8 +203,8 @@ const MYCPost = () => {
               label="Arrears Payment"
               name="arrears_payment"
               type="number"
-              value={formData.arrears_payment}
-              onChange={handleChange}
+              value={formData.arrears_payment || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.arrears_payment)}
               helperText={errors.arrears_payment}
               size="small"
@@ -211,8 +215,8 @@ const MYCPost = () => {
               label="Arrears 6 Months Plus"
               name="arrears_6_months_plus"
               type="number"
-              value={formData.arrears_6_months_plus}
-              onChange={handleChange}
+              value={formData.arrears_6_months_plus || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.arrears_6_months_plus)}
               helperText={errors.arrears_6_months_plus}
               size="small"
@@ -221,8 +225,8 @@ const MYCPost = () => {
             <TextField
               label="Contract Reference Number"
               name="contract_reference_number"
-              value={formData.contract_reference_number}
-              onChange={handleChange}
+              value={formData.contract_reference_number || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contract_reference_number)}
               helperText={errors.contract_reference_number}
               size="small"
@@ -234,8 +238,8 @@ const MYCPost = () => {
               label="Contract Expenditures"
               name="contract_expenditures"
               type="number"
-              value={formData.contract_expenditures}
-              onChange={handleChange}
+              value={formData.contract_expenditures || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contract_expenditures)}
               helperText={errors.contract_expenditures}
               size="small"
@@ -244,18 +248,20 @@ const MYCPost = () => {
             <TextField
               label="Contract Implementation Plan"
               name="contract_implementation_plan"
-              value={formData.contract_implementation_plan}
-              onChange={handleChange}
+              value={formData.contract_implementation_plan || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contract_implementation_plan)}
               helperText={errors.contract_implementation_plan}
               size="small"
               fullWidth
+              multiline
+              rows={4}
             />
             <TextField
               label="Contract Name"
               name="contract_name"
-              value={formData.contract_name}
-              onChange={handleChange}
+              value={formData.contract_name || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contract_name)}
               helperText={errors.contract_name}
               size="small"
@@ -266,8 +272,8 @@ const MYCPost = () => {
             <TextField
               label="Contractor Name"
               name="contractor_name"
-              value={formData.contractor_name}
-              onChange={handleChange}
+              value={formData.contractor_name || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contractor_name)}
               helperText={errors.contractor_name}
               size="small"
@@ -277,8 +283,8 @@ const MYCPost = () => {
               label="Contract Start Date"
               name="contract_start_date"
               type="date"
-              value={formData.contract_start_date}
-              onChange={handleChange}
+              value={formData.contract_start_date || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contract_start_date)}
               helperText={errors.contract_start_date}
               slotProps={{ inputLabel: { shrink: true } }}
@@ -289,8 +295,8 @@ const MYCPost = () => {
               label="Contract End Date"
               name="contract_end_date"
               type="date"
-              value={formData.contract_end_date}
-              onChange={handleChange}
+              value={formData.contract_end_date || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contract_end_date)}
               helperText={errors.contract_end_date}
               slotProps={{ inputLabel: { shrink: true } }}
@@ -302,18 +308,20 @@ const MYCPost = () => {
             <TextField
               label="Contract Payment Plan"
               name="contract_payment_plan"
-              value={formData.contract_payment_plan}
-              onChange={handleChange}
+              value={formData.contract_payment_plan || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contract_payment_plan)}
               helperText={errors.contract_payment_plan}
               size="small"
               fullWidth
+              multiline
+              rows={2}
             />
             <TextField
               label="Contract Status"
               name="contract_status"
-              value={formData.contract_status}
-              onChange={handleChange}
+              value={formData.contract_status || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contract_status)}
               helperText={errors.contract_status}
               size="small"
@@ -322,8 +330,8 @@ const MYCPost = () => {
             <TextField
               label="Contract Terms"
               name="contract_terms"
-              value={formData.contract_terms}
-              onChange={handleChange}
+              value={formData.contract_terms || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contract_terms)}
               helperText={errors.contract_terms}
               size="small"
@@ -335,8 +343,8 @@ const MYCPost = () => {
               label="Contract Value"
               name="contract_value"
               type="number"
-              value={formData.contract_value}
-              onChange={handleChange}
+              value={formData.contract_value || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.contract_value)}
               helperText={errors.contract_value}
               size="small"
@@ -347,8 +355,8 @@ const MYCPost = () => {
             <TextField
               label="Counterpart Requirement Specification"
               name="counterpart_requirement_specification"
-              value={formData.counterpart_requirement_specification}
-              onChange={handleChange}
+              value={formData.counterpart_requirement_specification || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.counterpart_requirement_specification)}
               helperText={errors.counterpart_requirement_specification}
               size="small"
@@ -358,8 +366,8 @@ const MYCPost = () => {
               label="Counterpart Value"
               name="counterpart_value"
               type="number"
-              value={formData.counterpart_value}
-              onChange={handleChange}
+              value={formData.counterpart_value || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.counterpart_value)}
               helperText={errors.counterpart_value}
               size="small"
@@ -370,8 +378,8 @@ const MYCPost = () => {
             <TextField
               label="Currency"
               name="currency"
-              value={formData.currency}
-              onChange={handleChange}
+              value={formData.currency || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.currency)}
               helperText={errors.currency}
               size="small"
@@ -380,18 +388,20 @@ const MYCPost = () => {
             <TextField
               label="Counterpart Financing Plan"
               name="counterpart_financing_plan"
-              value={formData.counterpart_financing_plan}
-              onChange={handleChange}
+              value={formData.counterpart_financing_plan || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.counterpart_financing_plan)}
               helperText={errors.counterpart_financing_plan}
               size="small"
               fullWidth
+              multiline
+              rows={3}
             />
             <TextField
               label="Funding Source"
               name="funding_source"
-              value={formData.funding_source}
-              onChange={handleChange}
+              value={formData.funding_source || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.funding_source)}
               helperText={errors.funding_source}
               size="small"
@@ -403,8 +413,8 @@ const MYCPost = () => {
               label="FY 1 MYC"
               name="fy_1_myc"
               type="number"
-              value={formData.fy_1_myc}
-              onChange={handleChange}
+              value={formData.fy_1_myc || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.fy_1_myc)}
               helperText={errors.fy_1_myc}
               size="small"
@@ -414,8 +424,8 @@ const MYCPost = () => {
               label="MTEF Ceilings"
               name="mtef_ceilings"
               type="number"
-              value={formData.mtef_ceilings}
-              onChange={handleChange}
+              value={formData.mtef_ceilings || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.mtef_ceilings)}
               helperText={errors.mtef_ceilings}
               size="small"
@@ -424,12 +434,14 @@ const MYCPost = () => {
             <TextField
               label="Non Contractual Commitments"
               name="non_contractual_commitments"
-              value={formData.non_contractual_commitments}
-              onChange={handleChange}
+              value={formData.non_contractual_commitments || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.non_contractual_commitments)}
               helperText={errors.non_contractual_commitments}
               size="small"
               fullWidth
+              multiline
+              rows={3}
             />
           </Stack>
 
@@ -438,8 +450,8 @@ const MYCPost = () => {
             <TextField
               label="Programme Code"
               name="programme_code"
-              value={formData.programme_code}
-              onChange={handleChange}
+              value={formData.programme_code || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.programme_code)}
               helperText={errors.programme_code}
               size="small"
@@ -448,8 +460,8 @@ const MYCPost = () => {
             <TextField
               label="Programme Name"
               name="programme_name"
-              value={formData.programme_name}
-              onChange={handleChange}
+              value={formData.programme_name || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.programme_name)}
               helperText={errors.programme_name}
               size="small"
@@ -458,8 +470,8 @@ const MYCPost = () => {
             <TextField
               label="Project Classification"
               name="project_classification"
-              value={formData.project_classification}
-              onChange={handleChange}
+              value={formData.project_classification || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.project_classification)}
               helperText={errors.project_classification}
               size="small"
@@ -470,8 +482,8 @@ const MYCPost = () => {
             <TextField
               label="Project Code"
               name="project_code"
-              value={formData.project_code}
-              onChange={handleChange}
+              value={formData.project_code || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.project_code)}
               helperText={errors.project_code}
               size="small"
@@ -481,8 +493,8 @@ const MYCPost = () => {
               label="Project Start Date"
               name="project_start_date"
               type="date"
-              value={formData.project_start_date}
-              onChange={handleChange}
+              value={formData.project_start_date || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.project_start_date)}
               helperText={errors.project_start_date}
               slotProps={{ inputLabel: { shrink: true } }}
@@ -493,8 +505,8 @@ const MYCPost = () => {
               label="Project End Date"
               name="project_end_date"
               type="date"
-              value={formData.project_end_date}
-              onChange={handleChange}
+              value={formData.project_end_date || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.project_end_date)}
               helperText={errors.project_end_date}
               slotProps={{ inputLabel: { shrink: true } }}
@@ -506,8 +518,8 @@ const MYCPost = () => {
             <TextField
               label="Project Name"
               name="project_name"
-              value={formData.project_name}
-              onChange={handleChange}
+              value={formData.project_name || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.project_name)}
               helperText={errors.project_name}
               size="small"
@@ -517,8 +529,8 @@ const MYCPost = () => {
             <TextField
               label="Vote Code"
               name="vote_code"
-              value={formData.vote_code}
-              onChange={handleChange}
+              value={formData.vote_code || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.vote_code)}
               helperText={errors.vote_code}
               size="small"
@@ -527,8 +539,8 @@ const MYCPost = () => {
             <TextField
               label="Vote Name"
               name="vote_name"
-              value={formData.vote_name}
-              onChange={handleChange}
+              value={formData.vote_name || ""}
+              onChange={handleInputChange}
               error={Boolean(errors.vote_name)}
               helperText={errors.vote_name}
               size="small"
@@ -537,13 +549,9 @@ const MYCPost = () => {
           </Stack>
 
           {/* Submit Button */}
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            justifyContent={"end"}
-          >
-            <ButtonMui type="submit" onClick={handleSubmit}>
-              Submit
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent={"flex-end"}>
+            <ButtonMui onClick={handleSubmit} type="submit">
+              Update
             </ButtonMui>
           </Stack>
         </Stack>
@@ -552,4 +560,4 @@ const MYCPost = () => {
   );
 };
 
-export default MYCPost;
+export default MYCEdit;

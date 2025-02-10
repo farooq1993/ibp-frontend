@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import {
   Table,
@@ -9,13 +10,28 @@ import {
   TableRow,
   Paper,
   Box,
+  Button,
   CircularProgress,
 } from "@mui/material";
+import CreateIcon from "@mui/icons-material/Create";
 
 const MYCReports = () => {
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const buttonStyles = {
+    padding: "5px 15px",
+    backgroundColor: "rgb(255, 217, 151)",
+    color: "black",
+    "&:hover": {
+      backgroundColor: "rgb(255, 217, 151)",
+    },
+    "&:active": {
+      backgroundColor: "rgba(255, 217, 151, 0.7)",
+    },
+    transition: "background-color 0.2s ease",
+  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -45,7 +61,7 @@ const MYCReports = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">MYC Reports</h2>
+      <h2 className="text-xl p-2  mb-4">MYC Reports</h2>
       <Box sx={{ overflowX: "hidden", width: "100%" }}>
         <TableContainer
           component={Paper}
@@ -112,6 +128,7 @@ const MYCReports = () => {
                 <TableCell sx={tableHeaderStyle}>
                   Financing Agreement Title
                 </TableCell>
+                <TableCell sx={tableHeaderStyle}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -170,6 +187,17 @@ const MYCReports = () => {
                     <TableCell>{project.approved_payments}</TableCell>
                     <TableCell>{project.annual_appropriations}</TableCell>
                     <TableCell>{project.financing_agreement_title}</TableCell>
+                    <TableCell>
+                      <Link to={`/edit/${project.id}`}>
+                        <Button
+                          size="small"
+                          sx={buttonStyles}
+                          startIcon={<CreateIcon />}
+                        >
+                          Edit
+                        </Button>
+                      </Link>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
