@@ -6,11 +6,16 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import { Button } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import CircularProgress from "@mui/material/CircularProgress";
 import Pagination from "@mui/material/Pagination";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
+// import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const NonContractual = () => {
   const [data, setData] = useState([]);
@@ -152,6 +157,93 @@ const NonContractual = () => {
     backgroundColor: "#ffd997",
   };
 
+  // Export to Excel
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(filteredData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Data");
+    XLSX.writeFile(wb, "data.xlsx");
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF({
+      orientation: "landscape", // More width for columns
+      unit: "mm",
+      format: "a2", // Bigger page size to fit all columns
+      compress: true,
+    });
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Project Budget Allocations", 14, 15);
+
+    // Define table headers
+    const tableColumn = [
+      "Vote Code",
+      "Vote Name",
+      "Project Code",
+      "Project Name",
+      "Programme Code",
+      "Programme Name",
+      "Description",
+      "GOU",
+      "GOU Arrears",
+      "ExtFin",
+      "Fiscal Year",
+    ];
+
+    // Extract table rows
+    const tableRows = filteredData.map((row) => [
+      row.Vote_Code,
+      row.Vote_Name,
+      row.Project_Code,
+      row.Project_Name,
+      row.Programme_Code,
+      row.Programme_Name,
+      row.Description,
+      row.GoU.toLocaleString(),
+      row.GoUArrears.toLocaleString(),
+      row.ExtFin.toLocaleString(),
+      row.Fiscal_Year,
+    ]);
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: "grid",
+      styles: {
+        fontSize: 7, // Reduce font size to fit more columns
+        cellPadding: 2,
+        overflow: "linebreak",
+      },
+      headStyles: {
+        fillColor: [52, 152, 219],
+        textColor: [255, 255, 255],
+        fontSize: 9,
+        fontStyle: "bold",
+      },
+      columnStyles: {
+        0: { cellWidth: "wrap" },
+        1: { cellWidth: "wrap" },
+        2: { cellWidth: "wrap" },
+        3: { cellWidth: "wrap" },
+        4: { cellWidth: "wrap" },
+        5: { cellWidth: "wrap" },
+        6: { cellWidth: "wrap" },
+        7: { cellWidth: "wrap" },
+        8: { cellWidth: "wrap" },
+        9: { cellWidth: "wrap" },
+        10: { cellWidth: "wrap" },
+      },
+      margin: { top: 20, left: 5, right: 5, bottom: 5 },
+      tableWidth: "auto", // Ensures all columns fit
+      horizontalPageBreak: true, // Allow multi-page tables
+    });
+
+    doc.save("Project_Budget_Allocations.pdf");
+  };
+
   return (
     <div>
       <Box
@@ -166,14 +258,48 @@ const NonContractual = () => {
           <b>{filteredData.length}</b>{" "}
           {filteredData.length === 1 ? "result" : "results"} found
         </Box>
-        <Box sx={{ display: "flex", gap: 3 }}>
+        <Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
+          <Button
+            sx={{
+              backgroundColor: "rgb(19, 131, 47)", // Background color
+              color: "white", // Text color (white)
+              "&:hover": {
+                backgroundColor: "rgb(19, 131, 47)", // Keeps the background color the same on hover
+              },
+              "&:active": {
+                backgroundColor: "rgba(19, 131, 47, 0.7)", // Light opacity when clicked
+              },
+              transition: "background-color 0.2s ease", // Smooth transition for background color
+            }}
+            fullWidth
+            onClick={exportToExcel}
+          >
+            Export to Excel
+          </Button>
+          <Button
+            sx={{
+              backgroundColor: "rgb(196, 50, 50)", // Background color
+              color: "white", // Text color (white)
+              "&:hover": {
+                backgroundColor: "rgb(196, 50, 50)", // Keeps the background color the same on hover
+              },
+              "&:active": {
+                backgroundColor: "rgba(196, 50, 50, 0.7)", // Light opacity when clicked
+              },
+              transition: "background-color 0.2s ease", // Smooth transition for background color
+            }}
+            fullWidth
+            onClick={exportToPDF}
+          >
+            Export to PDF
+          </Button>
           <TextField
             label="Search"
             variant="outlined"
             size="small"
             value={searchQuery}
             onChange={handleSearchChange}
-            sx={{ marginBottom: 2, flexBasis: "100%" }}
+            sx={{ flexBasis: "100%" }}
           />
         </Box>
       </Box>
@@ -182,7 +308,7 @@ const NonContractual = () => {
         component={Paper}
         elevation={0}
         variant="outlined"
-        sx={{ maxHeight: 500, overflow: "auto", position: "relative" }}
+        sx={{ maxHeight: 500, marginTop:"10px", overflow: "auto", position: "relative" }}
       >
         <Table stickyHeader aria-label="sticky table">
           <TableHead>

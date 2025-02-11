@@ -14,6 +14,9 @@ import {
   CircularProgress,
 } from "@mui/material";
 import CreateIcon from "@mui/icons-material/Create";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const MYCReports = () => {
   const [allProjects, setAllProjects] = useState([]);
@@ -58,10 +61,148 @@ const MYCReports = () => {
     fontWeight: "bold",
     backgroundColor: "#ffd997",
   };
+  // 🔹 Export to Excel Function
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(allProjects);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "MYC Reports");
+    XLSX.writeFile(workbook, "MYC_Reports.xlsx");
+  };
+
+  // 🔹 Export to PDF Function
+  const exportToPDF = () => {
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a2", // Bigger page size to fit all columns
+      compress: true,
+    });
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Multi-Year Commitment Reports", 14, 15);
+
+    // Define table headers
+    const tableColumn = [
+      "Vote Code",
+      "Vote Name",
+      "Project Start Date",
+      "Project Name",
+      "Project End Date",
+      "Project Code",
+      "Project Classification",
+      "Programme Name",
+      "Programme Code",
+      "Funding Source",
+      "Contract Value",
+      "Contract Status",
+      "Contract Name",
+      "Arrears",
+    ];
+
+    // Extract table rows
+    const tableRows = allProjects.map((project) => [
+      project.vote_code,
+      project.vote_name,
+      project.project_start_date,
+      project.project_name,
+      project.project_end_date,
+      project.project_code,
+      project.project_classification,
+      project.programme_name,
+      project.programme_code,
+      project.funding_source,
+      project.contract_value,
+      project.contract_status,
+      project.contract_name,
+      project.arrears,
+    ]);
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: "grid",
+      styles: {
+        fontSize: 7,
+        cellPadding: 2,
+        overflow: "linebreak",
+      },
+      headStyles: {
+        fillColor: [52, 152, 219],
+        textColor: [255, 255, 255],
+        fontSize: 9,
+        fontStyle: "bold",
+      },
+      columnStyles: {
+        0: { cellWidth: "wrap" },
+        1: { cellWidth: "wrap" },
+        2: { cellWidth: "wrap" },
+        3: { cellWidth: "wrap" },
+        4: { cellWidth: "wrap" },
+        5: { cellWidth: "wrap" },
+        6: { cellWidth: "wrap" },
+        7: { cellWidth: "wrap" },
+        8: { cellWidth: "wrap" },
+        9: { cellWidth: "wrap" },
+        10: { cellWidth: "wrap" },
+        11: { cellWidth: "wrap" },
+        12: { cellWidth: "wrap" },
+        13: { cellWidth: "wrap" },
+      },
+      margin: { top: 20, left: 5, right: 5, bottom: 5 },
+      tableWidth: "auto",
+      horizontalPageBreak: true,
+    });
+
+    doc.save("MYC_Reports.pdf");
+  };
 
   return (
     <div>
       <h2 className="text-xl p-2  mb-4">MYC Reports</h2>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 3,
+          marginBottom: "10px",
+          justifyContent: "flex-end",
+          alignItems: "center",
+        }}
+      >
+        <Button
+          sx={{
+            backgroundColor: "rgb(19, 131, 47)", // Background color
+            color: "white", // Text color (white)
+            "&:hover": {
+              backgroundColor: "rgb(19, 131, 47)", // Keeps the background color the same on hover
+            },
+            "&:active": {
+              backgroundColor: "rgba(19, 131, 47, 0.7)", // Light opacity when clicked
+            },
+            transition: "background-color 0.2s ease", // Smooth transition for background color
+          }}
+          onClick={exportToExcel}
+        >
+          Export to Excel
+        </Button>
+        <Button
+          sx={{
+            backgroundColor: "rgb(196, 50, 50)", // Background color
+            color: "white", // Text color (white)
+            "&:hover": {
+              backgroundColor: "rgb(196, 50, 50)", // Keeps the background color the same on hover
+            },
+            "&:active": {
+              backgroundColor: "rgba(196, 50, 50, 0.7)", // Light opacity when clicked
+            },
+            transition: "background-color 0.2s ease", // Smooth transition for background color
+          }}
+          onClick={exportToPDF}
+        >
+          Export to PDF
+        </Button>
+      </Box>
       <Box sx={{ overflowX: "hidden", width: "100%" }}>
         <TableContainer
           component={Paper}
