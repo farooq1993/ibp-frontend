@@ -22,6 +22,30 @@ const MYCReports = () => {
   const [allProjects, setAllProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [shadowVisible, setShadowVisible] = useState(true);
+  const tableContainerRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (tableContainerRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } =
+          tableContainerRef.current;
+        const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 5; // Adjust threshold for precision
+        setShadowVisible(!isAtEnd); // Remove shadow when Action column reaches its original position
+      }
+    };
+
+    const container = tableContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
 
   const buttonStyles = {
     position:"fix",
@@ -210,6 +234,7 @@ const MYCReports = () => {
           elevation={0}
           variant="outlined"
           sx={{ maxHeight: 540, overflow: "auto", position: "relative" }}
+          ref={tableContainerRef}
         >
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
@@ -270,7 +295,21 @@ const MYCReports = () => {
                 <TableCell sx={tableHeaderStyle}>
                   Financing Agreement Title
                 </TableCell>
-                <TableCell sx={tableHeaderStyle}>Action</TableCell>
+                <TableCell
+                  sx={{
+                    ...tableHeaderStyle,
+                    position: "sticky",
+                    right: 0,
+                    background: "#ffd997",
+                    zIndex: 2,
+                    boxShadow: shadowVisible
+                      ? "2px 1px 8px rgba(0, 0, 0, 0.1)"
+                      : "none", // Light shadow initially
+                    transition: "box-shadow 0.3s ease", // Smooth transition
+                  }}
+                >
+                  Action
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -329,7 +368,18 @@ const MYCReports = () => {
                     <TableCell>{project.approved_payments}</TableCell>
                     <TableCell>{project.annual_appropriations}</TableCell>
                     <TableCell>{project.financing_agreement_title}</TableCell>
-                    <TableCell>
+                    <TableCell
+                      sx={{
+                        position: "sticky",
+                        right: 0,
+                        background: "white",
+                        zIndex: 1,
+                        boxShadow: shadowVisible
+                          ? "2px 1px 8px rgba(0, 0, 0, 0.1)"
+                          : "none",
+                        transition: "box-shadow 0.3s ease",
+                      }}
+                    >
                       <Link to={`/edit/${project.id}`}>
                         <Button
                           size="small"
