@@ -24,6 +24,7 @@ const MYCReports = () => {
   const [error, setError] = useState(null);
 
   const buttonStyles = {
+    position:"fix",
     padding: "5px 15px",
     backgroundColor: "rgb(255, 217, 151)",
     color: "black",
