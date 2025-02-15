@@ -9,10 +9,16 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Box,
   Button,
+  Box,
   CircularProgress,
+  Menu,
+  MenuItem,
+  IconButton,
+  Typography,
+  Divider,
 } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
 import CreateIcon from "@mui/icons-material/Create";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -24,6 +30,7 @@ const MYCReports = () => {
   const [error, setError] = useState(null);
   const [shadowVisible, setShadowVisible] = useState(true);
   const tableContainerRef = React.useRef(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -85,6 +92,14 @@ const MYCReports = () => {
   const tableHeaderStyle = {
     fontWeight: "bold",
     backgroundColor: "#ffd997",
+  };
+
+  const handleDownloadClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
   };
   // 🔹 Export to Excel Function
   const exportToExcel = () => {
@@ -187,47 +202,47 @@ const MYCReports = () => {
     <div>
       <h2 className="text-xl p-2  mb-4">MYC Reports</h2>
       <Box
-        sx={{
-          display: "flex",
-          gap: 3,
-          marginBottom: "10px",
-          justifyContent: "flex-end",
-          alignItems: "center",
-        }}
-      >
-        <Button
           sx={{
-            backgroundColor: "rgb(19, 131, 47)", // Background color
-            color: "white", // Text color (white)
-            "&:hover": {
-              backgroundColor: "rgb(19, 131, 47)", // Keeps the background color the same on hover
-            },
-            "&:active": {
-              backgroundColor: "rgba(19, 131, 47, 0.7)", // Light opacity when clicked
-            },
-            transition: "background-color 0.2s ease", // Smooth transition for background color
+            display: "flex",
+            gap: 2,
+            marginBottom: 2,
+            justifyContent: "flex-end",
           }}
-          onClick={exportToExcel}
         >
-          Export to Excel
-        </Button>
-        <Button
-          sx={{
-            backgroundColor: "rgb(196, 50, 50)", // Background color
-            color: "white", // Text color (white)
-            "&:hover": {
-              backgroundColor: "rgb(196, 50, 50)", // Keeps the background color the same on hover
-            },
-            "&:active": {
-              backgroundColor: "rgba(196, 50, 50, 0.7)", // Light opacity when clicked
-            },
-            transition: "background-color 0.2s ease", // Smooth transition for background color
-          }}
-          onClick={exportToPDF}
-        >
-          Export to PDF
-        </Button>
-      </Box>
+          <IconButton
+            onClick={handleDownloadClick}
+            sx={{
+              background: "none", // Remove background
+              borderRadius: 0, // Remove circular border
+              padding: 0, // Remove padding
+            }}
+            disabled={loading} // Disable when loading
+          >
+            <DownloadIcon
+              sx={{
+                color: "rgb(132, 131, 131)",
+                border: "1px solid",
+                borderRadius: "2px",
+                marginRight: "2px",
+              }}
+            />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleCloseMenu}
+          >
+            {/* Download As Header */}
+            <MenuItem disabled>
+              <Typography variant="body2" sx={{ color: "rgb(60, 60, 60)" }}>
+                Download As
+              </Typography>
+            </MenuItem>
+            <Divider />
+            <MenuItem onClick={exportToExcel}>Excel</MenuItem>
+            <MenuItem onClick={exportToPDF}>PDF</MenuItem>
+          </Menu>
+        </Box>
       <Box sx={{ overflowX: "hidden", width: "100%" }}>
         <TableContainer
           component={Paper}
