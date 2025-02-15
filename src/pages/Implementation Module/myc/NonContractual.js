@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import { Button } from "@mui/material";
-import Paper from "@mui/material/Paper";
-import CircularProgress from "@mui/material/CircularProgress";
-import Pagination from "@mui/material/Pagination";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-// import { saveAs } from "file-saver";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  CircularProgress,
+  Menu,
+  MenuItem,
+  IconButton,
+  Typography,
+  Divider,
+  Pagination,
+} from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -29,6 +34,7 @@ const NonContractual = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [accessToken, setAccessToken] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
 
   // Function to login and fetch access_token
   const login = async () => {
@@ -157,6 +163,14 @@ const NonContractual = () => {
     backgroundColor: "#ffd997",
   };
 
+  const handleDownloadClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
   // Export to Excel
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(filteredData);
@@ -258,49 +272,47 @@ const NonContractual = () => {
           <b>{filteredData.length}</b>{" "}
           {filteredData.length === 1 ? "result" : "results"} found
         </Box>
-        <Box sx={{ display: "flex", gap: 3, alignItems: "center" }}>
-          <Button
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            marginBottom: 2,
+            justifyContent: "flex-end",
+          }}
+        >
+          <IconButton
+            onClick={handleDownloadClick}
             sx={{
-              backgroundColor: "rgb(19, 131, 47)", // Background color
-              color: "white", // Text color (white)
-              "&:hover": {
-                backgroundColor: "rgb(19, 131, 47)", // Keeps the background color the same on hover
-              },
-              "&:active": {
-                backgroundColor: "rgba(19, 131, 47, 0.7)", // Light opacity when clicked
-              },
-              transition: "background-color 0.2s ease", // Smooth transition for background color
+              background: "none", // Remove background
+              borderRadius: 0, // Remove circular border
+              padding: 0, // Remove padding
             }}
-            fullWidth
-            onClick={exportToExcel}
+            disabled={loading} // Disable when loading
           >
-            Export to Excel
-          </Button>
-          <Button
-            sx={{
-              backgroundColor: "rgb(196, 50, 50)", // Background color
-              color: "white", // Text color (white)
-              "&:hover": {
-                backgroundColor: "rgb(196, 50, 50)", // Keeps the background color the same on hover
-              },
-              "&:active": {
-                backgroundColor: "rgba(196, 50, 50, 0.7)", // Light opacity when clicked
-              },
-              transition: "background-color 0.2s ease", // Smooth transition for background color
-            }}
-            fullWidth
-            onClick={exportToPDF}
+            <DownloadIcon
+              sx={{
+                color: "rgb(132, 131, 131)",
+                border: "1px solid",
+                borderRadius: "2px",
+                marginRight: "2px",
+              }}
+            />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleCloseMenu}
           >
-            Export to PDF
-          </Button>
-          <TextField
-            label="Search"
-            variant="outlined"
-            size="small"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            sx={{ flexBasis: "100%" }}
-          />
+            {/* Download As Header */}
+            <MenuItem disabled>
+              <Typography variant="body2" sx={{ color: "rgb(60, 60, 60)" }}>
+                Download As
+              </Typography>
+            </MenuItem>
+            <Divider />
+            <MenuItem onClick={exportToExcel}>Excel</MenuItem>
+            <MenuItem onClick={exportToPDF}>PDF</MenuItem>
+          </Menu>
         </Box>
       </Box>
 
@@ -308,7 +320,12 @@ const NonContractual = () => {
         component={Paper}
         elevation={0}
         variant="outlined"
-        sx={{ maxHeight: 500, marginTop:"10px", overflow: "auto", position: "relative" }}
+        sx={{
+          maxHeight: 500,
+          marginTop: "10px",
+          overflow: "auto",
+          position: "relative",
+        }}
       >
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
