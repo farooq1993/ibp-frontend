@@ -3,6 +3,8 @@ import { Tabs, Tab, Box, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Contractual from "./Contractual";
 import NonContractual from "./NonContractual";
+import MYCReports from "./MYCReports";
+import ButtonMui from "../../../components/mui-component/ButtonMui"
 
 const ViewJob = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -32,12 +34,12 @@ const ViewJob = () => {
         padding: "0",
       }}
     >
-      <Button variant="outlined" color="secondary" onClick={handleBackClick}>
+      <Button variant="outlined" color="danger" onClick={handleBackClick}>
         Back
       </Button>
-      <Button variant="contained" color="primary" onClick={handleSubmitClick}>
+      <ButtonMui variant="contained" color="primary" onClick={handleSubmitClick}>
         Submit
-      </Button>
+      </ButtonMui>
     </Box>
   );
 
@@ -51,7 +53,21 @@ const ViewJob = () => {
           backgroundColor: "white",
         }}
       >
-        <Tabs value={activeTab} onChange={handleTabChange}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          sx={{
+            "& .MuiTabs-indicator": {
+              backgroundColor: "#ffd977", // Customize active tab indicator color
+            },
+            "& .MuiTab-root": {
+              color: "#000", // Default color for all tabs
+              "&.Mui-selected": {
+                color: "#000", // Color for the selected tab
+              },
+            },
+          }}
+        >
           <Tab label="CONTRACTUAL" />
           <Tab label="NON CONTRACTUAL" />
           <Tab label="COUNTERPART" />
@@ -69,7 +85,7 @@ const ViewJob = () => {
         )}
         {activeTab === 1 && (
           <>
-            <NonContractual />
+            <MYCReports />
             {renderButtons()}
           </>
         )}
