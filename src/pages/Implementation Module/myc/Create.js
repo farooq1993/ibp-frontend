@@ -3,7 +3,6 @@ import { Tabs, Tab, Box, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Contractual from "./Contractual";
 import NonContractual from "./NonContractual";
-import MYCReports from "./MYCReports";
 import ButtonMui from "../../../components/mui-component/ButtonMui"
 
 const ViewJob = () => {
@@ -85,7 +84,7 @@ const ViewJob = () => {
         )}
         {activeTab === 1 && (
           <>
-            <MYCReports />
+            <NonContractual />
             {renderButtons()}
           </>
         )}

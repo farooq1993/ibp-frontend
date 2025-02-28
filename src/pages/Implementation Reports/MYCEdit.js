@@ -135,6 +135,11 @@ const MYCEdit = () => {
     }
   };
 
+  const handleBackClick = () => {
+    // Navigate to the previous page
+    navigate(-1); // Equivalent to browser back
+  };
+
   return (
     <Box>
       <h2 className="text-xl p-2  mb-4">Edit MYC Report</h2>
@@ -593,6 +598,13 @@ const MYCEdit = () => {
               spacing={2}
               justifyContent={"flex-end"}
             >
+              <Button
+                variant="outlined"
+                color="danger"
+                onClick={handleBackClick}
+              >
+                Back
+              </Button>
               <ButtonMui onClick={handleSubmit} type="submit">
                 Update
               </ButtonMui>
